@@ -5,9 +5,7 @@
 
 # Piggy Metrics
 
-**A simple way to deal with personal finances**
-
-This is a proof-of-concept application, which demonstrates [Microservice Architecture Pattern](http://martinfowler.com/microservices/) using Spring Boot, Spring Cloud and Docker.
+This is a tutorial project, which demonstrates [Microservice Architecture Pattern](http://martinfowler.com/microservices/) using Spring Boot, Spring Cloud and Docker.
 With a pretty neat user interface, by the way.
 
 ![](https://cloud.githubusercontent.com/assets/6069066/13864234/442d6faa-ecb9-11e5-9929-34a9539acde0.png)
@@ -51,7 +49,7 @@ GET	| /notifications/settings/current	| Get current account notification setting
 PUT	| /notifications/settings/current	| Save current account notification settings	| × | ×
 
 #### Notes
-- Each microservice has it's own database, so there is no way to bypass API and access persistance data directly.
+- Each microservice has its own database, so there is no way to bypass API and access persistence data directly.
 - In this project, I use MongoDB as a primary database for each service. It might also make sense to have a polyglot persistence architecture (сhoose the type of db that is best suited to service requirements).
 - Service-to-service communication is quite simplified: microservices talking using only synchronous REST API. Common practice in a real-world systems is to use combination of interaction styles. For example, perform synchronous GET request to retrieve data and use asynchronous approach via Message broker for create/update operations in order to decouple services and buffer messages. However, this brings us to the [eventual consistency](http://martinfowler.com/articles/microservice-trade-offs.html#consistency) world.
 
@@ -61,7 +59,7 @@ There's a bunch of common patterns in distributed systems, which could help us t
 ### Config service
 [Spring Cloud Config](http://cloud.spring.io/spring-cloud-config/spring-cloud-config.html) is horizontally scalable centralized configuration service for distributed systems. It uses a pluggable repository layer that currently supports local storage, Git, and Subversion. 
 
-In this project, I use `native profile`, which simply loads config files from the local classpath. You can see `shared` directory in [Config service resources](https://github.com/sqshq/PiggyMetrics/tree/master/config/src/main/resources). Now, when Notification-service requests it's configuration, Config service responses with `shared/notification-service.yml` and `shared/application.yml` (which is shared between all client applications).
+In this project, I use `native profile`, which simply loads config files from the local classpath. You can see `shared` directory in [Config service resources](https://github.com/sqshq/PiggyMetrics/tree/master/config/src/main/resources). Now, when Notification-service requests its configuration, Config service responses with `shared/notification-service.yml` and `shared/application.yml` (which is shared between all client applications).
 
 ##### Client side usage
 Just build Spring Boot application with `spring-cloud-starter-config` dependency, autoconfiguration will do the rest.
@@ -112,7 +110,7 @@ public List<DataPoint> getStatisticsByAccountName(@PathVariable String name) {
 ### API Gateway
 As you can see, there are three core services, which expose external API to client. In a real-world systems, this number can grow very quickly as well as whole system complexity. Actually, hundreds of services might be involved in rendering of one complex webpage.
 
-In theory, a client could make requests to each of the microservices directly. But obviously, there are challenges and limitations with this option, like necessity to know all endpoints addresses, perform http request for each peace of information separately, merge the result on a client side. Another problem is non web-friendly protocols which might be used on the backend.
+In theory, a client could make requests to each of the microservices directly. But obviously, there are challenges and limitations with this option, like necessity to know all endpoints addresses, perform http request for each piece of information separately, merge the result on a client side. Another problem is non web-friendly protocols which might be used on the backend.
 
 Usually a much better approach is to use API Gateway. It is a single entry point into the system, used to handle requests by routing them to the appropriate backend service or by invoking multiple backend services and [aggregating the results](http://techblog.netflix.com/2013/01/optimizing-netflix-api.html). Also, it can be used for authentication, insights, stress and canary testing, service migration, static response handling, active traffic management.
 
@@ -138,7 +136,7 @@ The key part of Service discovery is Registry. I use Netflix Eureka in this proj
 
 With Spring Boot, you can easily build Eureka Registry with `spring-cloud-starter-eureka-server` dependency, `@EnableEurekaServer` annotation and simple configuration properties.
 
-Client support enabled with `@EnableDiscoveryClient` annotation an `bootstrap.yml` with application name:
+Client support enabled with `@EnableDiscoveryClient` annotation a `bootstrap.yml` with application name:
 ``` yml
 spring:
   application:
@@ -186,7 +184,7 @@ public interface StatisticsServiceClient {
 
 ### Monitor dashboard
 
-In this project configuration, each microservice with Hystrix on board pushes metrics to Turbine via Spring Cloud Bus (with AMQP broker). The Monitoring project is just a small Spring boot application with [Turbine](https://github.com/Netflix/Turbine) and [Hystrix Dashboard](https://github.com/Netflix/Hystrix/tree/master/hystrix-dashboard).
+In this project configuration, each microservice with Hystrix on board pushes metrics to Turbine via Spring Cloud Bus (with AMQP broker). The Monitoring project is just a small Spring boot application with [Turbine](https://github.com/Netflix/Turbine) and [Hystrix Dashboard](https://github.com/Netflix-Skunkworks/hystrix-dashboard).
 
 See below [how to get it up and running](https://github.com/sqshq/PiggyMetrics#how-to-run-all-the-things).
 
@@ -238,7 +236,7 @@ Here is a simple Continuous Delivery workflow, implemented in this project:
 
 <img width="880" src="https://cloud.githubusercontent.com/assets/6069066/14159789/0dd7a7ce-f6e9-11e5-9fbb-a7fe0f4431e3.png">
 
-In this [configuration](https://github.com/sqshq/PiggyMetrics/blob/master/.travis.yml), Travis CI builds tagged images for each successful git push. So, there are always `latest` image for each microservice on [Docker Hub](https://hub.docker.com/r/sqshq/) and older images, tagged with git commit hash. It's easy to deploy any of them and quickly rollback, if needed.
+In this [configuration](https://github.com/sqshq/PiggyMetrics/blob/master/.travis.yml), Travis CI builds tagged images for each successful git push. So, there are always the `latest` images for each microservice on [Docker Hub](https://hub.docker.com/r/sqshq/) and older images, tagged with git commit hash. It's easy to deploy any of them and quickly rollback, if needed.
 
 ## How to run all the things?
 
@@ -246,7 +244,7 @@ Keep in mind, that you are going to start 8 Spring Boot applications, 4 MongoDB 
 
 #### Before you start
 - Install Docker and Docker Compose.
-- Export environment variables: `CONFIG_SERVICE_PASSWORD`, `NOTIFICATION_SERVICE_PASSWORD`, `STATISTICS_SERVICE_PASSWORD`, `ACCOUNT_SERVICE_PASSWORD`, `MONGODB_PASSWORD` (make sure they were exported: `printenv`)
+- Change environment variable values in `.env` file for more security or leave it as it is.
 - Make sure to build the project: `mvn package [-DskipTests]`
 
 #### Production mode
@@ -257,6 +255,8 @@ Just copy `docker-compose.yml` and hit `docker-compose up`
 If you'd like to build images yourself (with some changes in the code, for example), you have to clone all repository and build artifacts with maven. Then, run `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
 
 `docker-compose.dev.yml` inherits `docker-compose.yml` with additional possibility to build images locally and expose all containers ports for convenient development.
+
+If you'd like to start applications in Intellij Idea you need to either use [EnvFile plugin](https://plugins.jetbrains.com/plugin/7861-envfile) or manually export environment variables listed in `.env` file (make sure they were exported: `printenv`)
 
 #### Important endpoints
 - http://localhost:80 - Gateway
@@ -269,6 +269,6 @@ All Spring Boot applications require already running [Config Server](https://git
 
 Also, Service Discovery mechanism needs some time after all applications startup. Any service is not available for discovery by clients until the instance, the Eureka server and the client all have the same metadata in their local cache, so it could take 3 heartbeats. Default heartbeat period is 30 seconds.
 
-## Contributions welcome!
+## Contributions are welcome!
 
 PiggyMetrics is open source, and would greatly appreciate your help. Feel free to suggest and implement improvements.
